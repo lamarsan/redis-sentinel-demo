@@ -1,6 +1,6 @@
 package com.lamarsan.sentinel;
 
-import com.lamarsan.sentinel.util.RedisUtil;
+import com.lamarsan.sentinel.util.RedisSentinelUtil;
 
 /**
  * className: Test
@@ -11,8 +11,12 @@ import com.lamarsan.sentinel.util.RedisUtil;
  * @date 2019/9/13 15:54
  */
 public class Test {
-    public static void main(String[] args) {
-        String result = RedisUtil.get("hello");
-        System.out.println(result);
+    public static void main(String[] args) throws InterruptedException {
+        RedisSentinelUtil.setnx("hello", "world");
+        while (true) {
+            Thread.sleep(10000);
+            String result = RedisSentinelUtil.get("hello");
+            System.out.println(result);
+        }
     }
 }

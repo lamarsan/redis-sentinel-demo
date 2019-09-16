@@ -10,34 +10,32 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * className: RedisUtil
+ * className: RedisSentinelUtil
  * description: TODO
  *
  * @author hasee
  * @version 1.0
  * @date 2018/12/26 10:57
  */
-public class RedisUtil {
+public class RedisSentinelUtil {
     private static final Logger myLogger = Logger.getLogger("com.lamarsan.sentinel.util");
-
-    public static final int default_seconds = 300;
-
-    private static RedisUtil client = null;
 
     private static JedisSentinelPool pool = null;
 
     static {
         try {
             Set<String> sentinels = new HashSet<String>();
-            sentinels.add("x.x.x.x:26379");
-            sentinels.add("x.x.x.x:26380");
-            sentinels.add("x.x.x.x:26381");
-
-            JedisPoolConfig ab = new JedisPoolConfig();
-            ab.setMinIdle(Integer.parseInt("5"));
-            ab.setMaxTotal(5);
-            ab.setMaxIdle(5);
-            pool = new JedisSentinelPool("mymaster", sentinels, ab, "******");
+            sentinels.add("******:26380");
+            sentinels.add("******:26379");
+            sentinels.add("******:26381");
+            String masterName = "mymaster";
+            String password = "******";
+            JedisPoolConfig config = new JedisPoolConfig();
+            config.setMinIdle(8);
+            config.setMaxTotal(100);
+            config.setMaxIdle(100);
+            config.setMaxWaitMillis(10000);
+            pool = new JedisSentinelPool(masterName, sentinels, config, password);
             try {
                 pool.getResource();
             } catch (JedisConnectionException e) {
@@ -50,7 +48,7 @@ public class RedisUtil {
         }
     }
 
-    public static void returnResource(JedisSentinelPool pool, Jedis jedis) {
+    private static void returnResource(JedisSentinelPool pool, Jedis jedis) {
         if (jedis != null) {
             jedis.close();
         }
